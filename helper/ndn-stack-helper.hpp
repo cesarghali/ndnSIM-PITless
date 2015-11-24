@@ -149,6 +149,9 @@ public:
   Ptr<FaceContainer>
   Install(Ptr<Node> node) const;
 
+  Ptr<FaceContainer>
+  InstallPITless(Ptr<Node> node) const;
+
   /**
    * \brief Install Ndn stack on each node in the input container
    *
@@ -164,6 +167,9 @@ public:
   Ptr<FaceContainer>
   Install(const NodeContainer& c) const;
 
+  Ptr<FaceContainer>
+  InstallPITless(const NodeContainer& c) const;
+
   /**
    * \brief Install Ndn stack on all nodes in the simulation
    *
@@ -172,6 +178,9 @@ public:
    */
   Ptr<FaceContainer>
   InstallAll() const;
+
+  Ptr<FaceContainer>
+  InstallAllPITless() const;
 
   /**
    * \brief Set flag indicating necessity to install default routes in FIB

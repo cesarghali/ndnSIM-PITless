@@ -35,6 +35,7 @@
 
 namespace nfd {
 class Forwarder;
+class PITlessForwarder;
 class FibManager;
 class StrategyChoiceManager;
 typedef boost::property_tree::ptree ConfigSection;
@@ -98,6 +99,12 @@ public:
    */
   shared_ptr<nfd::Forwarder>
   getForwarder();
+
+  bool
+  getIsPITless();
+
+  void
+  setIsPITless(bool isPITless);
 
   /**
    * \brief Get smart pointer to nfd::FibManager, used by node's NFD

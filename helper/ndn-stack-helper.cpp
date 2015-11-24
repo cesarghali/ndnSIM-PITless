@@ -132,9 +132,25 @@ StackHelper::Install(const NodeContainer& c) const
 }
 
 Ptr<FaceContainer>
+StackHelper::InstallPITless(const NodeContainer& c) const
+{
+  Ptr<FaceContainer> faces = Create<FaceContainer>();
+  for (NodeContainer::Iterator i = c.Begin(); i != c.End(); ++i) {
+    faces->AddAll(InstallPITless(*i));
+  }
+  return faces;
+}
+
+Ptr<FaceContainer>
 StackHelper::InstallAll() const
 {
   return Install(NodeContainer::GetGlobal());
+}
+
+Ptr<FaceContainer>
+StackHelper::InstallAllPITless() const
+{
+  return InstallPITless(NodeContainer::GetGlobal());
 }
 
 Ptr<FaceContainer>
@@ -149,6 +165,44 @@ StackHelper::Install(Ptr<Node> node) const
   }
 
   Ptr<L3Protocol> ndn = m_ndnFactory.Create<L3Protocol>();
+  ndn->getConfig().put("tables.cs_max_packets", (m_maxCsSize == 0) ? 1 : m_maxCsSize);
+
+  // Create and aggregate content store if NFD's contest store has been disabled
+  if (m_maxCsSize == 0) {
+    ndn->AggregateObject(m_contentStoreFactory.Create<ContentStore>());
+  }
+
+  // Aggregate L3Protocol on node (must be after setting ndnSIM CS)
+  node->AggregateObject(ndn);
+
+  for (uint32_t index = 0; index < node->GetNDevices(); index++) {
+    Ptr<NetDevice> device = node->GetDevice(index);
+    // This check does not make sense: LoopbackNetDevice is installed only if IP stack is installed,
+    // Normally, ndnSIM works without IP stack, so no reason to check
+    // if (DynamicCast<LoopbackNetDevice> (device) != 0)
+    //   continue; // don't create face for a LoopbackNetDevice
+
+    faces->Add(this->createAndRegisterFace(node, ndn, device));
+  }
+
+  return faces;
+}
+
+Ptr<FaceContainer>
+StackHelper::InstallPITless(Ptr<Node> node) const
+{
+  Ptr<FaceContainer> faces = Create<FaceContainer>();
+
+  if (node->GetObject<L3Protocol>() != 0) {
+    NS_FATAL_ERROR("Cannot re-install NDN stack on node "
+                   << node->GetId());
+    return 0;
+  }
+
+  Ptr<L3Protocol> ndn = m_ndnFactory.Create<L3Protocol>();
+  // This line is different as compare to the Install function. It tells L3Protocol
+  // to create a PITless forwarder
+  ndn->setIsPITless(true);
   ndn->getConfig().put("tables.cs_max_packets", (m_maxCsSize == 0) ? 1 : m_maxCsSize);
 
   // Create and aggregate content store if NFD's contest store has been disabled

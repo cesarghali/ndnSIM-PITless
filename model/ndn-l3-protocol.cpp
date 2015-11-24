@@ -38,6 +38,7 @@
 #include <boost/property_tree/info_parser.hpp>
 
 #include "ns3/ndnSIM/NFD/daemon/fw/forwarder.hpp"
+#include "ns3/ndnSIM/NFD/daemon/fw/pitless-forwarder.hpp"
 #include "ns3/ndnSIM/NFD/daemon/mgmt/internal-face.hpp"
 #include "ns3/ndnSIM/NFD/daemon/mgmt/fib-manager.hpp"
 #include "ns3/ndnSIM/NFD/daemon/mgmt/face-manager.hpp"
@@ -155,6 +156,7 @@ private:
   friend class L3Protocol;
 
   shared_ptr<nfd::Forwarder> m_forwarder;
+  bool m_isPITless;
 
   shared_ptr<nfd::InternalFace> m_internalFace;
   shared_ptr<nfd::FibManager> m_fibManager;
@@ -183,7 +185,10 @@ L3Protocol::~L3Protocol()
 void
 L3Protocol::initialize()
 {
-  m_impl->m_forwarder = make_shared<nfd::Forwarder>();
+  if (!m_impl->m_isPITless)
+    m_impl->m_forwarder = make_shared<nfd::Forwarder>();
+  else
+    m_impl->m_forwarder = make_shared<nfd::PITlessForwarder>();
 
   initializeManagement();
   Simulator::ScheduleWithContext(m_node->GetId(), Seconds(0), &L3Protocol::initializeRibManager, this);
@@ -302,6 +307,18 @@ shared_ptr<nfd::Forwarder>
 L3Protocol::getForwarder()
 {
   return m_impl->m_forwarder;
+}
+
+bool
+L3Protocol::getIsPITless()
+{
+  return m_impl->m_isPITless;
+}
+
+void
+L3Protocol::setIsPITless(bool isPITless)
+{
+  m_impl->m_isPITless = isPITless;
 }
 
 shared_ptr<nfd::FibManager>

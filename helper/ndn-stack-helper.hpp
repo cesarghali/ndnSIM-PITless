@@ -88,7 +88,7 @@ public:
                   const std::string& value3 = "", const std::string& attr4 = "",
                   const std::string& value4 = "");
 
-  typedef Callback<shared_ptr<NetDeviceFace>, Ptr<Node>, Ptr<L3Protocol>, Ptr<NetDevice>>
+  typedef Callback<shared_ptr<NetDeviceFace>, Ptr<Node>, Ptr<L3Protocol>, Ptr<NetDevice>, bool>
     NetDeviceFaceCreateCallback;
 
   /**
@@ -227,9 +227,10 @@ private:
 
   shared_ptr<NetDeviceFace>
   PointToPointNetDeviceCallback(Ptr<Node> node, Ptr<L3Protocol> ndn,
-                                Ptr<NetDevice> netDevice) const;
+                                Ptr<NetDevice> netDevice, bool isPITless = false) const;
   shared_ptr<NetDeviceFace>
-  createAndRegisterFace(Ptr<Node> node, Ptr<L3Protocol> ndn, Ptr<NetDevice> device) const;
+  createAndRegisterFace(Ptr<Node> node, Ptr<L3Protocol> ndn, Ptr<NetDevice> device,
+                        bool isPITless = false) const;
 
 public:
   void

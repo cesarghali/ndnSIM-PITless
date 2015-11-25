@@ -22,7 +22,7 @@
 
 #include "ns3/ndnSIM/model/ndn-common.hpp"
 
-#include "ndn-app.hpp"
+#include "ndn-pitless-app.hpp"
 
 #include "ns3/random-variable-stream.h"
 #include "ns3/nstime.h"
@@ -47,7 +47,7 @@ namespace ndn {
  * @ingroup ndn-apps
  * \brief NDN application for sending out Interest packets
  */
-class PITlessConsumer : public App {
+class PITlessConsumer : public PITlessApp {
 public:
   static TypeId
   GetTypeId();

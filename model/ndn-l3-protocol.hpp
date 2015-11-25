@@ -127,7 +127,7 @@ public:
    * \see AppFace, NetDeviceFace
    */
   nfd::FaceId
-  addFace(shared_ptr<Face> face);
+  addFace(shared_ptr<Face> face, bool isPITless = false);
 
   /**
    * \brief Get face by face ID

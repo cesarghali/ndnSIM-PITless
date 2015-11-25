@@ -220,7 +220,7 @@ StackHelper::InstallPITless(Ptr<Node> node) const
     // if (DynamicCast<LoopbackNetDevice> (device) != 0)
     //   continue; // don't create face for a LoopbackNetDevice
 
-    faces->Add(this->createAndRegisterFace(node, ndn, device));
+    faces->Add(this->createAndRegisterFace(node, ndn, device, true));
   }
 
   return faces;
@@ -271,13 +271,13 @@ StackHelper::DefaultNetDeviceCallback(Ptr<Node> node, Ptr<L3Protocol> ndn,
 
 shared_ptr<NetDeviceFace>
 StackHelper::PointToPointNetDeviceCallback(Ptr<Node> node, Ptr<L3Protocol> ndn,
-                                           Ptr<NetDevice> device) const
+                                           Ptr<NetDevice> device, bool isPITless) const
 {
   NS_LOG_DEBUG("Creating point-to-point NetDeviceFace on node " << node->GetId());
 
   shared_ptr<NetDeviceFace> face = std::make_shared<NetDeviceFace>(node, device);
 
-  ndn->addFace(face);
+  ndn->addFace(face, isPITless);
   NS_LOG_LOGIC("Node " << node->GetId() << ": added NetDeviceFace as face #"
                        << face->getLocalUri());
 
@@ -333,14 +333,15 @@ StackHelper::UpdateAll()
 }
 
 shared_ptr<NetDeviceFace>
-StackHelper::createAndRegisterFace(Ptr<Node> node, Ptr<L3Protocol> ndn, Ptr<NetDevice> device) const
+StackHelper::createAndRegisterFace(Ptr<Node> node, Ptr<L3Protocol> ndn, Ptr<NetDevice> device,
+                                   bool isPITless) const
 {
   shared_ptr<NetDeviceFace> face;
 
   for (const auto& item : m_netDeviceCallbacks) {
     if (device->GetInstanceTypeId() == item.first ||
         device->GetInstanceTypeId().IsChildOf(item.first)) {
-      face = item.second(node, ndn, device);
+      face = item.second(node, ndn, device, isPITless);
       if (face != 0)
         break;
     }

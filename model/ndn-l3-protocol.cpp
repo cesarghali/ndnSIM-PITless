@@ -373,11 +373,11 @@ L3Protocol::DoDispose(void)
 }
 
 nfd::FaceId
-L3Protocol::addFace(shared_ptr<Face> face)
+L3Protocol::addFace(shared_ptr<Face> face, bool isPITless)
 {
   NS_LOG_FUNCTION(this << face.get());
 
-  m_impl->m_forwarder->addFace(face);
+  m_impl->m_forwarder->addFace(face, isPITless);
 
   // Connect Signals to TraceSource
   face->onReceiveInterest.connect

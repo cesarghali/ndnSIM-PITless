@@ -140,7 +140,7 @@ PITlessConsumer::StartApplication() // Called at time specified by Start
   NS_LOG_FUNCTION_NOARGS();
 
   // do base stuff
-  App::StartApplication();
+  PITlessApp::StartApplication();
 
   // Announce this consumer's prefix
   FibHelper::AddRoute(GetNode(), m_interestSupportingName, m_face, 0);
@@ -157,7 +157,7 @@ PITlessConsumer::StopApplication() // Called at time specified by Stop
   Simulator::Cancel(m_sendEvent);
 
   // cleanup base stuff
-  App::StopApplication();
+  PITlessApp::StopApplication();
 }
 
 void
@@ -220,7 +220,7 @@ PITlessConsumer::OnData(shared_ptr<const Data> data)
   if (!m_active)
     return;
 
-  App::OnData(data); // tracing inside
+  PITlessApp::OnData(data); // tracing inside
 
   NS_LOG_FUNCTION(this << data);
 

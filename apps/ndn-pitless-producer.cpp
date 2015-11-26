@@ -44,7 +44,7 @@ PITlessProducer::GetTypeId(void)
   static TypeId tid =
     TypeId("ns3::ndn::PITlessProducer")
       .SetGroupName("Ndn")
-      .SetParent<App>()
+      .SetParent<PITlessApp>()
       .AddConstructor<PITlessProducer>()
       .AddAttribute("Prefix", "Prefix, for which producer has the data", StringValue("/"),
                     MakeNameAccessor(&PITlessProducer::m_prefix), MakeNameChecker())
@@ -79,7 +79,7 @@ void
 PITlessProducer::StartApplication()
 {
   NS_LOG_FUNCTION_NOARGS();
-  App::StartApplication();
+  PITlessApp::StartApplication();
 
   FibHelper::AddRoute(GetNode(), m_prefix, m_face, 0);
 }
@@ -89,13 +89,13 @@ PITlessProducer::StopApplication()
 {
   NS_LOG_FUNCTION_NOARGS();
 
-  App::StopApplication();
+  PITlessApp::StopApplication();
 }
 
 void
 PITlessProducer::OnInterest(shared_ptr<const Interest> interest)
 {
-  App::OnInterest(interest); // tracing inside
+  PITlessApp::OnInterest(interest); // tracing inside
 
   NS_LOG_FUNCTION(this << interest);
 

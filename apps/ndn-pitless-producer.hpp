@@ -22,7 +22,7 @@
 
 #include "ns3/ndnSIM/model/ndn-common.hpp"
 
-#include "ndn-app.hpp"
+#include "ndn-pitless-app.hpp"
 #include "ns3/ndnSIM/model/ndn-common.hpp"
 
 #include "ns3/nstime.h"
@@ -40,7 +40,7 @@ namespace ndn {
  * size and name same as in Interest.cation, which replying every incoming Interest
  * with Data packet with a specified size and name same as in Interest.
  */
-class PITlessProducer : public App {
+class PITlessProducer : public PITlessApp {
 public:
   static TypeId
   GetTypeId(void);

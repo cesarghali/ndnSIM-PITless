@@ -29,7 +29,6 @@
 #include "ns3/ndnSIM/model/ndn-l3-protocol.hpp"
 #include "ns3/ndnSIM/NFD/daemon/mgmt/strategy-choice-manager.hpp"
 #include "ns3/ndnSIM/NFD/daemon/fw/forwarder.hpp"
-#include "ns3/ndnSIM/NFD/daemon/fw/pitless-forwarder.hpp"
 #include "ns3/ndnSIM/NFD/daemon/table/strategy-choice.hpp"
 
 namespace ndn {
@@ -88,10 +87,6 @@ public:
   static void
   Install(Ptr<Node> node, const Name& namePrefix);
 
-  template<class Strategy>
-  static void
-  InstallPITless(Ptr<Node> node, const Name& namePrefix);
-
   /**
    * @brief Install a custom strategy on nodes in @p c container for @p namePrefix namespace
    * @tparam Strategy Class name of the custom strategy
@@ -100,10 +95,6 @@ public:
   static void
   Install(const NodeContainer& c, const Name& namePrefix);
 
-  template<class Strategy>
-  static void
-  InstallPITless(const NodeContainer& c, const Name& namePrefix);
-
   /**
    * @brief Install a custom strategy on all nodes for @p namePrefix namespace
    * @tparam Strategy Class name of the custom strategy
@@ -111,10 +102,6 @@ public:
   template<class Strategy>
   static void
   InstallAll(const Name& namePrefix);
-
-  template<class Strategy>
-  static void
-  InstallAllPITless(const Name& namePrefix);
 
 private:
   static void
@@ -141,24 +128,6 @@ StrategyChoiceHelper::Install(Ptr<Node> node, const Name& namePrefix)
 
 template<class Strategy>
 inline void
-StrategyChoiceHelper::InstallPITless(Ptr<Node> node, const Name& namePrefix)
-{
-  Ptr<L3Protocol> l3Protocol = node->GetObject<L3Protocol>();
-  NS_ASSERT(l3Protocol != nullptr);
-  NS_ASSERT(l3Protocol->getForwarder() != nullptr);
-
-  nfd::PITlessForwarder& forwarder = dynamic_cast<nfd::PITlessForwarder&>(*l3Protocol->getForwarder());
-  nfd::StrategyChoice& strategyChoice = forwarder.getStrategyChoice();
-
-  if (!strategyChoice.hasStrategy(Strategy::STRATEGY_NAME)) {
-    strategyChoice.install(make_shared<Strategy>(ref(forwarder)));
-  }
-
-  Install(node, namePrefix, Strategy::STRATEGY_NAME);
-}
-
-template<class Strategy>
-inline void
 StrategyChoiceHelper::Install(const NodeContainer& c, const Name& namePrefix)
 {
   for (NodeContainer::Iterator i = c.Begin(); i != c.End(); ++i) {
@@ -168,25 +137,9 @@ StrategyChoiceHelper::Install(const NodeContainer& c, const Name& namePrefix)
 
 template<class Strategy>
 inline void
-StrategyChoiceHelper::InstallPITless(const NodeContainer& c, const Name& namePrefix)
-{
-  for (NodeContainer::Iterator i = c.Begin(); i != c.End(); ++i) {
-    InstallPITless<Strategy>(*i, namePrefix);
-  }
-}
-
-template<class Strategy>
-inline void
 StrategyChoiceHelper::InstallAll(const Name& namePrefix)
 {
   Install<Strategy>(NodeContainer::GetGlobal(), namePrefix);
-}
-
-template<class Strategy>
-inline void
-StrategyChoiceHelper::InstallAllPITless(const Name& namePrefix)
-{
-  InstallPITless<Strategy>(NodeContainer::GetGlobal(), namePrefix);
 }
 
 } // namespace ndn

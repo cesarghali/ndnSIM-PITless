@@ -75,14 +75,14 @@ main(int argc, char* argv[])
   ndnHelper.InstallAllPITless();
 
   // Choosing forwarding strategy
-  ndn::StrategyChoiceHelper::InstallAllPITless<nfd::fw::PITlessStrategy>("/prefix");
+  ndn::StrategyChoiceHelper::InstallAll("/prefix", "/localhost/nfd/strategy/pitless");
 
 
   // Installing applications
 
   // Consumer
   ndn::AppHelper consumerHelper("ns3::ndn::PITlessConsumerCbr");
-  // Consumer will request /prefix/0, /prefix/1, ...
+  // Consumer will request /producer/0, /producer/1, ...
   consumerHelper.SetPrefix("/producer");
   consumerHelper.SetAttribute("SupportingName", StringValue("/consumer"));
   consumerHelper.SetAttribute("Frequency", StringValue("10")); // 10 interests a second
@@ -90,7 +90,7 @@ main(int argc, char* argv[])
 
   // Producer
   ndn::AppHelper producerHelper("ns3::ndn::PITlessProducer");
-  // Producer will reply to all requests starting with /prefix
+  // Producer will reply to all requests starting with /producer
   producerHelper.SetPrefix("/producer");
   producerHelper.SetAttribute("PayloadSize", StringValue("1024"));
   producerHelper.Install(nodes.Get(2)); // last node

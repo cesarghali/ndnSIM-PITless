@@ -34,6 +34,7 @@
 
 #include <set>
 #include <map>
+#include <string>
 
 #include <boost/multi_index_container.hpp>
 #include <boost/multi_index/tag.hpp>
@@ -141,7 +142,7 @@ protected:
 
   Time m_offTime;          ///< \brief Time interval between packets
   Name m_interestName;     ///< \brief NDN Name of the Interest (use Name)
-  Name m_interestSupportingName;     ///< \brief NDN Supporting Name of the Interest (use Supporting Name)
+  std::string m_interestSupportingName;     ///< \brief NDN Supporting Name of the Interest (use Supporting Name)
   Time m_interestLifeTime; ///< \brief LifeTime for interest packet
 
   /// @cond include_hidden

@@ -109,7 +109,7 @@ PITlessProducer::OnInterest(shared_ptr<const Interest> interest)
 
   auto data = make_shared<Data>();
   data->setName(supportingName);
-  data->setSupportingName(dataName);
+  data->setSupportingName(dataName.toUri());
   data->setFreshnessPeriod(::ndn::time::milliseconds(m_freshness.GetMilliSeconds()));
 
   data->setContent(make_shared< ::ndn::Buffer>(m_virtualPayloadSize));
@@ -126,7 +126,7 @@ PITlessProducer::OnInterest(shared_ptr<const Interest> interest)
 
   data->setSignature(signature);
 
-  NS_LOG_INFO("node(" << GetNode()->GetId() << ") responding with Data: " << data->getName());
+  NS_LOG_INFO("node(" << GetNode()->GetId() << ") responding with Data: " << data->getSupportingName());
 
   // to create real wire encoding
   data->wireEncode();

@@ -26,6 +26,7 @@
 #include "ns3/string.h"
 #include "ns3/boolean.h"
 #include "ns3/uinteger.h"
+#include "ns3/string.h"
 #include "ns3/integer.h"
 #include "ns3/double.h"
 
@@ -56,8 +57,8 @@ PITlessConsumer::GetTypeId(void)
 
       .AddAttribute("Prefix", "Name of the Interest", StringValue("/"),
                     MakeNameAccessor(&PITlessConsumer::m_interestName), MakeNameChecker())
-      .AddAttribute("SupportingName", "Supporting Name of the Interest, which is the prefix of the consumer", StringValue("/"),
-                    MakeNameAccessor(&PITlessConsumer::m_interestSupportingName), MakeNameChecker())
+      .AddAttribute("SupportingName", "Supporting Name of the Interest, which is the prefix of the consumer", StringValue(""),
+                    MakeStringAccessor(&PITlessConsumer::m_interestSupportingName), MakeStringChecker())
       .AddAttribute("LifeTime", "LifeTime for interest packet", StringValue("2s"),
                     MakeTimeAccessor(&PITlessConsumer::m_interestLifeTime), MakeTimeChecker())
 
@@ -143,7 +144,7 @@ PITlessConsumer::StartApplication() // Called at time specified by Start
   PITlessApp::StartApplication();
 
   // Announce this consumer's prefix
-  //  FibHelper::AddRoute(GetNode(), m_interestSupportingName, m_face, 0);
+  FibHelper::AddRoute(GetNode(), Name(m_interestSupportingName), m_face, 0);
 
   ScheduleNextPacket();
 }
@@ -196,8 +197,7 @@ PITlessConsumer::SendPacket()
   interest->setNonce(m_rand->GetValue(0, std::numeric_limits<uint32_t>::max()));
   interest->setName(*nameWithSequence);
   // This line is important to create a name with SupportingName tlv type
-  Name supportingName(m_interestSupportingName.toUri(), true);
-  interest->setSupportingName(supportingName);
+  interest->setSupportingName(m_interestSupportingName);
   time::milliseconds interestLifeTime(m_interestLifeTime.GetMilliSeconds());
   interest->setInterestLifetime(interestLifeTime);
 
@@ -228,8 +228,10 @@ PITlessConsumer::OnData(shared_ptr<const Data> data)
 
   // NS_LOG_INFO ("Received content object: " << boost::cref(*data));
 
+  Name dataName(data->getSupportingName());
+
   // This could be a problem......
-  uint32_t seq = data->getName().at(-1).toSequenceNumber();
+  uint32_t seq = dataName.at(-1).toSequenceNumber();
   NS_LOG_INFO("< DATA for " << seq);
 
   int hopCount = 0;

@@ -195,7 +195,9 @@ PITlessConsumer::SendPacket()
   shared_ptr<Interest> interest = make_shared<Interest>();
   interest->setNonce(m_rand->GetValue(0, std::numeric_limits<uint32_t>::max()));
   interest->setName(*nameWithSequence);
-  interest->setSupportingName(m_interestSupportingName);
+  // This line is important to create a name with SupportingName tlv type
+  Name supportingName(m_interestSupportingName.toUri(), true);
+  interest->setSupportingName(supportingName);
   time::milliseconds interestLifeTime(m_interestLifeTime.GetMilliSeconds());
   interest->setInterestLifetime(interestLifeTime);
 

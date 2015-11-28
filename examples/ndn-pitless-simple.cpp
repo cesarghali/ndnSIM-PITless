@@ -32,9 +32,9 @@ namespace ns3 {
  * This scenario simulates a very simple network topology:
  *
  *
- *      +----------+     1Mbps      +--------+     1Mbps      +----------+
- *      | consumer | <------------> | router | <------------> | producer |
- *      +----------+         10ms   +--------+          10ms  +----------+
+ *      +----------+     1Mbps      +-----------+     1Mbps      +----------+
+ *      | consumer | <------------> | 3 routers | <------------> | producer |
+ *      +----------+         10ms   +-----------+          10ms  +----------+
  *
  *
  * Consumer requests data from producer with frequency 10 interests per second
@@ -62,12 +62,14 @@ main(int argc, char* argv[])
 
   // Creating nodes
   NodeContainer nodes;
-  nodes.Create(3);
+  nodes.Create(5);
 
   // Connecting nodes using two links
   PointToPointHelper p2p;
   p2p.Install(nodes.Get(0), nodes.Get(1));
   p2p.Install(nodes.Get(1), nodes.Get(2));
+  p2p.Install(nodes.Get(2), nodes.Get(3));
+  p2p.Install(nodes.Get(3), nodes.Get(4));
 
   // Install NDN stack on all nodes
   ndn::StackHelper ndnHelper;
@@ -93,7 +95,7 @@ main(int argc, char* argv[])
   // Producer will reply to all requests starting with /producer
   producerHelper.SetPrefix("/producer");
   producerHelper.SetAttribute("PayloadSize", StringValue("1024"));
-  producerHelper.Install(nodes.Get(2)); // last node
+  producerHelper.Install(nodes.Get(4)); // last node
 
   Simulator::Stop(Seconds(20.0));
 

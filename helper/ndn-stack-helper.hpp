@@ -155,6 +155,9 @@ public:
   Ptr<FaceContainer>
   InstallPITless(Ptr<Node> node) const;
 
+  Ptr<FaceContainer>
+  InstallPITlessWithCallback(Ptr<Node> node, size_t intDelayCallback, size_t contentDelayCallback, size_t id) const;
+
   /**
    * \brief Install Ndn stack on each node in the input container
    *

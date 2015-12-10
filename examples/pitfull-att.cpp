@@ -24,7 +24,7 @@
 #include "ns3/point-to-point-module.h"
 #include "ns3/ndnSIM-module.h"
 
-#include "ns3/ndnSIM/NFD/daemon/fw/pitless-strategy.hpp"
+// #include "ns3/ndnSIM/NFD/daemon/fw/pitless-strategy.hpp"
 
 namespace ns3 {
 
@@ -196,22 +196,22 @@ main(int argc, char* argv[])
   ndnHelperNoCache.SetOldContentStore("ns3::ndn::cs::Nocache"); // no cache
   for (int i = 0; i < NUM_OF_CONSUMERS; i++) {
     ndnHelperNoCache.Install(nodes.Get(i));
-    ndnHelperNoCache.InstallPITless(nodes.Get(i));
   }
 
   // Install on producer
   ndnHelperNoCache.Install(nodes.Get(producerId));
-  ndnHelperNoCache.InstallPITless(nodes.Get(producerId));
 
   // Install on routers with cache
   ndn::StackHelper ndnHelperWithCache;
   ndnHelperWithCache.SetDefaultRoutes(true);
   ndnHelperWithCache.SetOldContentStore("ns3::ndn::cs::Freshness::Lru", "MaxSize", "0");
   for (int i = NUM_OF_CONSUMERS; i < NUM_OF_CONSUMERS + NUM_OF_ROUTERS; i++) {
-    ndnHelperWithCache.Install(nodes.Get(i));
-    ndnHelperWithCache.InstallPITless(nodes.Get(i));
+    // ndnHelperWithCache.Install(nodes.Get(i));
     ndnHelperWithCache.InstallWithCallback(nodes.Get(i), (size_t)&InterestForwardingDelay, (size_t)&ContentForwardingDelay, i);
   }
+
+  ndn::GlobalRoutingHelper ndnGlobalRoutingHelper;
+  ndnGlobalRoutingHelper.InstallAll();
 
   // Consumer
   ndn::AppHelper consumerHelper("ns3::ndn::ConsumerCbr");
@@ -226,9 +226,13 @@ main(int argc, char* argv[])
   producerHelper.SetPrefix("/producer");
   producerHelper.SetAttribute("PayloadSize", StringValue("1024"));
   producerHelper.Install(nodes.Get(producerId)); // last node
+  ndnGlobalRoutingHelper.AddOrigins("/producer", nodes.Get(producerId));
 
   // Choosing forwarding strategy
-  ndn::StrategyChoiceHelper::InstallAll("/prefix", "/localhost/nfd/strategy/pitless");
+  // ndn::StrategyChoiceHelper::InstallAll("/prefix", "/localhost/nfd/strategy/pitless");
+  ndn::StrategyChoiceHelper::InstallAll("/prefix", "/localhost/nfd/strategy/best-route");
+
+  ndn::GlobalRoutingHelper::CalculateRoutes();
 
   Simulator::Stop(Seconds(simulationTime));
 

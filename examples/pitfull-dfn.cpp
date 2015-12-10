@@ -191,40 +191,43 @@ main(int argc, char* argv[])
     ndnHelperNoCache.SetOldContentStore("ns3::ndn::cs::Nocache"); // no cache
     for (int i = 0; i < NUM_OF_CONSUMERS; i++) {
       ndnHelperNoCache.Install(nodes.Get(i));
-      ndnHelperNoCache.InstallPITless(nodes.Get(i));
     }
 
     // Install on producer
     ndnHelperNoCache.Install(nodes.Get(producerId));
-    ndnHelperNoCache.InstallPITless(nodes.Get(producerId));
 
     // Install on routers with cache
     ndn::StackHelper ndnHelperWithCache;
     ndnHelperWithCache.SetDefaultRoutes(true);
-    ndnHelperWithCache.SetOldContentStore("ns3::ndn::cs::Freshness::Lru", "MaxSize", "0");
+    ndnHelperWithCache.SetOldContentStore("ns3::ndn::cs::Freshness::Lru", "MaxSize", "0"); // 0 means no limit
     for (int i = NUM_OF_CONSUMERS; i < NUM_OF_CONSUMERS + NUM_OF_ROUTERS; i++) {
-      ndnHelperWithCache.Install(nodes.Get(i));
-      ndnHelperWithCache.InstallPITless(nodes.Get(i));
+    //   ndnHelperWithCache.Install(nodes.Get(i));
       ndnHelperWithCache.InstallWithCallback(nodes.Get(i), (size_t)&InterestForwardingDelay, (size_t)&ContentForwardingDelay, i);
     }
 
+    ndn::GlobalRoutingHelper ndnGlobalRoutingHelper;
+    ndnGlobalRoutingHelper.InstallAll();
+
     // Consumer
-    ndn::AppHelper consumerHelper("ns3::ndn::PITlessConsumerCbr");
+    ndn::AppHelper consumerHelper("ns3::ndn::ConsumerCbr");
     consumerHelper.SetPrefix("/producer"); // Consumer will request /producer/0, /producer/1, ...
-    consumerHelper.SetAttribute("SupportingName", StringValue("/consumer"));
     consumerHelper.SetAttribute("Frequency", StringValue("10")); // 10 interests a second
     for (int i = 0; i < NUM_OF_CONSUMERS; i++) {
       consumerHelper.Install(nodes.Get(i));
     }
 
     // Producer
-    ndn::AppHelper producerHelper("ns3::ndn::PITlessProducer");
+    ndn::AppHelper producerHelper("ns3::ndn::Producer");
     producerHelper.SetPrefix("/producer");
     producerHelper.SetAttribute("PayloadSize", StringValue("1024"));
     producerHelper.Install(nodes.Get(producerId)); // last node
+    ndnGlobalRoutingHelper.AddOrigins("/producer", nodes.Get(producerId));
 
     // Choosing forwarding strategy
-    ndn::StrategyChoiceHelper::InstallAll("/prefix", "/localhost/nfd/strategy/pitless");
+    // ndn::StrategyChoiceHelper::InstallAll("/prefix", "/localhost/nfd/strategy/pitless");
+    ndn::StrategyChoiceHelper::InstallAll("/prefix", "/localhost/nfd/strategy/best-route");
+
+    ndn::GlobalRoutingHelper::CalculateRoutes();
 
     Simulator::Stop(Seconds(simulationTime));
 

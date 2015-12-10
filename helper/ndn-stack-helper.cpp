@@ -159,8 +159,7 @@ StackHelper::Install(Ptr<Node> node) const
   Ptr<FaceContainer> faces = Create<FaceContainer>();
 
   if (node->GetObject<L3Protocol>() != 0) {
-    NS_FATAL_ERROR("Cannot re-install NDN stack on node "
-                   << node->GetId());
+    NS_FATAL_ERROR("Cannot re-install NDN stack on node " << node->GetId());
     return 0;
   }
 
@@ -207,8 +206,7 @@ StackHelper::InstallPITless(Ptr<Node> node) const
   Ptr<FaceContainer> faces = Create<FaceContainer>();
 
   if (node->GetObject<L3Protocol>() != 0) {
-    NS_FATAL_ERROR("Cannot re-install NDN stack on node "
-                   << node->GetId());
+    NS_FATAL_ERROR("Cannot re-install PITless NDN stack on node " << node->GetId());
     return 0;
   }
 
@@ -238,6 +236,20 @@ StackHelper::InstallPITless(Ptr<Node> node) const
 
   return faces;
 }
+
+Ptr<FaceContainer>
+StackHelper::InstallPITlessWithCallback(Ptr<Node> node, size_t intDelayCallback, size_t contentDelayCallback, size_t id) const
+{
+  Ptr<FaceContainer> faces = InstallPITless(node);
+
+  // Set the ForwardingDelay callback
+  Ptr<L3Protocol> l3Protocol = node->GetObject<L3Protocol>();
+  nfd::Forwarder& forwarder = *l3Protocol->getForwarder();
+  forwarder.setForwardingDelayCallback(intDelayCallback, contentDelayCallback, id);
+
+  return faces;
+}
+
 
 void
 StackHelper::AddNetDeviceFaceCreateCallback(TypeId netDeviceType,

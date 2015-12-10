@@ -189,6 +189,19 @@ StackHelper::Install(Ptr<Node> node) const
 }
 
 Ptr<FaceContainer>
+StackHelper::InstallWithCallback(Ptr<Node> node, size_t forwardingDelayCallback, size_t id) const
+{
+  Ptr<FaceContainer> faces = Install(node);
+
+  // Set the ForwardingDelay callback
+  Ptr<L3Protocol> l3Protocol = node->GetObject<L3Protocol>();
+  nfd::Forwarder& forwarder = *l3Protocol->getForwarder();
+  forwarder.setForwardingDelayCallback(forwardingDelayCallback, id);
+
+  return faces;
+}
+
+Ptr<FaceContainer>
 StackHelper::InstallPITless(Ptr<Node> node) const
 {
   Ptr<FaceContainer> faces = Create<FaceContainer>();

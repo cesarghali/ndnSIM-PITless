@@ -150,6 +150,9 @@ public:
   Install(Ptr<Node> node) const;
 
   Ptr<FaceContainer>
+  InstallWithCallback(Ptr<Node> node, size_t forwardingDelayCallback, size_t id) const;
+
+  Ptr<FaceContainer>
   InstallPITless(Ptr<Node> node) const;
 
   /**

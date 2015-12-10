@@ -66,6 +66,9 @@ public:
   static void
   Install(Ptr<Node> node, const Name& namePrefix, const Name& strategy);
 
+  static void
+  InstallWithCallback(Ptr<Node> node, const Name& namePrefix, size_t forwardingDelayCallback, size_t id);
+
   /**
    * @brief Install a built-in strategy @p strategy on nodes in @p c container for
    *        @p namePrefix namespace
@@ -86,6 +89,10 @@ public:
   template<class Strategy>
   static void
   Install(Ptr<Node> node, const Name& namePrefix);
+
+  template<class Strategy>
+  static void
+  InstallWithCallback(Ptr<Node> node, const Name& namePrefix, size_t forwardingDelayCallback, size_t id);
 
   /**
    * @brief Install a custom strategy on nodes in @p c container for @p namePrefix namespace
@@ -117,6 +124,25 @@ StrategyChoiceHelper::Install(Ptr<Node> node, const Name& namePrefix)
   NS_ASSERT(l3Protocol->getForwarder() != nullptr);
 
   nfd::Forwarder& forwarder = *l3Protocol->getForwarder();
+  nfd::StrategyChoice& strategyChoice = forwarder.getStrategyChoice();
+
+  if (!strategyChoice.hasStrategy(Strategy::STRATEGY_NAME)) {
+    strategyChoice.install(make_shared<Strategy>(ref(forwarder)));
+  }
+
+  Install(node, namePrefix, Strategy::STRATEGY_NAME);
+}
+
+template<class Strategy>
+inline void
+StrategyChoiceHelper::InstallWithCallback(Ptr<Node> node, const Name& namePrefix, size_t forwardingDelayCallback, size_t id)
+{
+  Ptr<L3Protocol> l3Protocol = node->GetObject<L3Protocol>();
+  NS_ASSERT(l3Protocol != nullptr);
+  NS_ASSERT(l3Protocol->getForwarder() != nullptr);
+
+  nfd::Forwarder& forwarder = *l3Protocol->getForwarder();
+  forwarder.setForwardingDelayCallback(forwardingDelayCallback, id);
   nfd::StrategyChoice& strategyChoice = forwarder.getStrategyChoice();
 
   if (!strategyChoice.hasStrategy(Strategy::STRATEGY_NAME)) {

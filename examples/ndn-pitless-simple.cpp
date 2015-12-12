@@ -77,7 +77,7 @@ main(int argc, char* argv[])
   ndnHelper.InstallAllPITless();
 
   // Choosing forwarding strategy
-  ndn::StrategyChoiceHelper::InstallAll("/prefix", "/localhost/nfd/strategy/pitless");
+  ndn::StrategyChoiceHelper::InstallAll("/prefix", "/localhost/nfd/strategy/pitless-best-route");
 
 
   // Installing applications

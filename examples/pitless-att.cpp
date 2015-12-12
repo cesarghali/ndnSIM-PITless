@@ -35,13 +35,22 @@ namespace ns3 {
 #define NUM_OF_PRODUCER 1
 #define TOTAL_NODES NUM_OF_CONSUMERS + NUM_OF_ROUTERS + NUM_OF_PRODUCER
 
-ofstream delayFile;
+ofstream intDelayFile;
 
 void
 InterestForwardingDelay(size_t id, ns3::Time eventTime, float delay)
 {
-    delayFile << id << "\t" << eventTime.GetNanoSeconds() << "\t" << delay * 1000000000 << "\n";
+    intDelayFile << id << "\t" << eventTime.GetNanoSeconds() << "\t" << delay * 1000000000 << "\n";
 }
+
+ofstream contentDelayFile;
+
+void
+ContentForwardingDelay(size_t id, ns3::Time eventTime, float delay)
+{
+    contentDelayFile << id << "\t" << eventTime.GetNanoSeconds() << "\t" << delay * 1000000000 << "\n";
+}
+
 
 int
 main(int argc, char* argv[])
@@ -53,14 +62,17 @@ main(int argc, char* argv[])
 
   // Read optional command-line parameters
   int simulationTime = 1000;
-  std::string delayFileName = "delays.txt";
+  std::string intDelayFileName = "int-delays.txt";
+  std::string contentDelayFileName = "content-delays.txt";
 
   CommandLine cmd;
   cmd.AddValue("time", "simulation time argument", simulationTime);
-  cmd.AddValue("delay", "delay name", delayFileName);
+  cmd.AddValue("intdelay", "delay name", intDelayFileName);
+  cmd.AddValue("contentdelay", "delay name", contentDelayFileName);
   cmd.Parse(argc, argv);
 
-  delayFile.open(delayFileName);
+  intDelayFile.open(intDelayFileName);
+  contentDelayFile.open(contentDelayFileName);
 
   NodeContainer nodes;
   nodes.Create(NUM_OF_CONSUMERS + NUM_OF_ROUTERS + NUM_OF_PRODUCER);
@@ -199,7 +211,7 @@ main(int argc, char* argv[])
   for (int i = NUM_OF_CONSUMERS; i < NUM_OF_CONSUMERS + NUM_OF_ROUTERS; i++) {
     // ndnHelperWithCache.Install(nodes.Get(i));
     // ndnHelperWithCache.InstallPITless(nodes.Get(i));
-    ndnHelperWithCache.InstallPITlessWithCallback(nodes.Get(i), (size_t)&InterestForwardingDelay, (size_t)&InterestForwardingDelay, i);
+    ndnHelperWithCache.InstallPITlessWithCallback(nodes.Get(i), (size_t)&InterestForwardingDelay, (size_t)&ContentForwardingDelay, i);
   }
 
   ndn::GlobalRoutingHelper ndnGlobalRoutingHelper;
@@ -237,9 +249,12 @@ main(int argc, char* argv[])
   Simulator::Run();
   Simulator::Destroy();
 
-  delayFile.flush();
-  delayFile.close();
+  intDelayFile.flush();
+  intDelayFile.close();
 
+  contentDelayFile.flush();
+  contentDelayFile.close();
+  
   return 0;
 }
 

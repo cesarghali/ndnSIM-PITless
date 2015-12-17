@@ -240,7 +240,7 @@ main(int argc, char* argv[])
   ndnGlobalRoutingHelper.AddOrigins("/producer", nodes.Get(producerId));
 
   // Choosing forwarding strategy
-  ndn::StrategyChoiceHelper::InstallAll("/prefix", "/localhost/nfd/strategy/pitless");
+  ndn::StrategyChoiceHelper::InstallAll("/prefix", "/localhost/nfd/strategy/pitless-best-route");
 
   ndn::GlobalRoutingHelper::CalculateRoutes();
 

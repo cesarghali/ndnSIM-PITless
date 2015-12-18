@@ -50,6 +50,8 @@ Consumer::GetTypeId(void)
     TypeId("ns3::ndn::Consumer")
       .SetGroupName("Ndn")
       .SetParent<App>()
+      .AddAttribute("RTTDelayCallback", "Pointer to RTTDelayCallback", UintegerValue(0),
+                    MakeUintegerAccessor(&Consumer::m_rttDelayCallback), MakeUintegerChecker<uint32_t>())
       .AddAttribute("StartSeq", "Initial sequence number", IntegerValue(0),
                     MakeIntegerAccessor(&Consumer::m_seq), MakeIntegerChecker<int32_t>())
 
@@ -233,6 +235,13 @@ Consumer::OnData(shared_ptr<const Data> data)
     }
   }
 
+  auto end = std::chrono::high_resolution_clock::now();
+  std::chrono::duration<float> duration = end - m_rttDelay[seq];
+  if (m_rttDelayCallback != 0) {
+    RTTDelayCallback rttDelayCallback = reinterpret_cast<RTTDelayCallback>(m_rttDelayCallback);
+    rttDelayCallback(GetNode()->GetId(), ns3::Simulator::Now(), duration.count(), hopCount);
+  }
+
   SeqTimeoutsContainer::iterator entry = m_seqLastDelay.find(seq);
   if (entry != m_seqLastDelay.end()) {
     m_lastRetransmittedInterestDataDelay(this, seq, Simulator::Now() - entry->time, hopCount);
@@ -245,6 +254,7 @@ Consumer::OnData(shared_ptr<const Data> data)
 
   m_seqRetxCounts.erase(seq);
   m_seqFullDelay.erase(seq);
+  m_rttDelay.erase(seq);
   m_seqLastDelay.erase(seq);
 
   m_seqTimeouts.erase(seq);
@@ -275,6 +285,7 @@ Consumer::WillSendOutInterest(uint32_t sequenceNumber)
 
   m_seqTimeouts.insert(SeqTimeout(sequenceNumber, Simulator::Now()));
   m_seqFullDelay.insert(SeqTimeout(sequenceNumber, Simulator::Now()));
+  m_rttDelay[sequenceNumber] = std::chrono::high_resolution_clock::now();
 
   m_seqLastDelay.erase(sequenceNumber);
   m_seqLastDelay.insert(SeqTimeout(sequenceNumber, Simulator::Now()));

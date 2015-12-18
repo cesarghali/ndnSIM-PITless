@@ -51,6 +51,15 @@ ContentForwardingDelay(size_t id, ns3::Time eventTime, float delay)
     contentDelayFile << id << "\t" << eventTime.GetNanoSeconds() << "\t" << delay * 1000000000 << "\n";
 }
 
+ofstream rttDelayFile;
+
+void
+RTTDelayCallback(size_t id, ns3::Time eventTime, float delay, int hopCount)
+{
+  rttDelayFile << id << "\t" << eventTime.GetNanoSeconds() << "\t" << delay * 1000000000 << "\t" << hopCount << "\n";
+}
+
+
 int
 main(int argc, char* argv[])
 {
@@ -63,17 +72,18 @@ main(int argc, char* argv[])
   int simulationTime = 1000;
   std::string intDelayFileName = "int-delays.txt";
   std::string contentDelayFileName = "content-delays.txt";
-  std::string firstInterestDataDelayFileName = "interest-data-delays.txt";
+  std::string rttDelayFileName = "rtt-delays.txt";
 
   CommandLine cmd;
   cmd.AddValue("time", "simulation time argument", simulationTime);
   cmd.AddValue("intdelay", "delay name", intDelayFileName);
   cmd.AddValue("contentdelay", "delay name", contentDelayFileName);
-  cmd.AddValue("firstinterestdatadelay", "delay name", firstInterestDataDelayFileName);
+  cmd.AddValue("rttdelay", "delay name", rttDelayFileName);
   cmd.Parse(argc, argv);
 
   intDelayFile.open(intDelayFileName);
   contentDelayFile.open(contentDelayFileName);
+  rttDelayFile.open(rttDelayFileName);
 
   NodeContainer nodes;
   nodes.Create(NUM_OF_CONSUMERS + NUM_OF_ROUTERS + NUM_OF_PRODUCER);
@@ -219,6 +229,7 @@ main(int argc, char* argv[])
   ndn::AppHelper consumerHelper("ns3::ndn::ConsumerCbr");
   consumerHelper.SetPrefix("/producer"); // Consumer will request /producer/0, /producer/1, ...
   consumerHelper.SetAttribute("Frequency", StringValue("10")); // 10 interests a second
+  consumerHelper.SetAttribute("RTTDelayCallback", UintegerValue((size_t)&RTTDelayCallback));
   for (int i = 0; i < NUM_OF_CONSUMERS; i++) {
     consumerHelper.Install(nodes.Get(i));
   }
@@ -238,8 +249,6 @@ main(int argc, char* argv[])
 
   Simulator::Stop(Seconds(simulationTime));
 
-  ndn::AppDelayTracer::InstallAll(firstInterestDataDelayFileName);
-
   Simulator::Run();
   Simulator::Destroy();
 
@@ -248,6 +257,9 @@ main(int argc, char* argv[])
 
   contentDelayFile.flush();
   contentDelayFile.close();
+
+  rttDelayFile.flush();
+  rttDelayFile.close();
 
   return 0;
 }

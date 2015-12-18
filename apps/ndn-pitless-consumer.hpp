@@ -35,11 +35,14 @@
 #include <set>
 #include <map>
 #include <string>
+#include <chrono>
 
 #include <boost/multi_index_container.hpp>
 #include <boost/multi_index/tag.hpp>
 #include <boost/multi_index/ordered_index.hpp>
 #include <boost/multi_index/member.hpp>
+
+typedef void (*RTTDelayCallback)(int id, ns3::Time, float, uint32_t);
 
 namespace ns3 {
 namespace ndn {
@@ -202,11 +205,14 @@ protected:
   SeqTimeoutsContainer m_seqLastDelay;
   SeqTimeoutsContainer m_seqFullDelay;
   std::map<uint32_t, uint32_t> m_seqRetxCounts;
+  std::map<uint32_t, std::chrono::high_resolution_clock::time_point> m_rttDelay;
 
   TracedCallback<Ptr<App> /* app */, uint32_t /* seqno */, Time /* delay */, int32_t /*hop count*/>
     m_lastRetransmittedInterestDataDelay;
   TracedCallback<Ptr<App> /* app */, uint32_t /* seqno */, Time /* delay */,
                  uint32_t /*retx count*/, int32_t /*hop count*/> m_firstInterestDataDelay;
+
+  uint32_t m_rttDelayCallback;
 
   /// @endcond
 };

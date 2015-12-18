@@ -64,11 +64,13 @@ main(int argc, char* argv[])
   int simulationTime = 1000;
   std::string intDelayFileName = "int-delays.txt";
   std::string contentDelayFileName = "content-delays.txt";
+  std::string firstInterestDataDelayFileName = "interest-data-delays.txt";
 
   CommandLine cmd;
   cmd.AddValue("time", "simulation time argument", simulationTime);
   cmd.AddValue("intdelay", "delay name", intDelayFileName);
   cmd.AddValue("contentdelay", "delay name", contentDelayFileName);
+  cmd.AddValue("firstinterestdatadelay", "delay name", firstInterestDataDelayFileName);
   cmd.Parse(argc, argv);
 
   intDelayFile.open(intDelayFileName);
@@ -245,6 +247,8 @@ main(int argc, char* argv[])
   ndn::GlobalRoutingHelper::CalculateRoutes();
 
   Simulator::Stop(Seconds(simulationTime));
+
+  ndn::AppDelayTracer::InstallAll(firstInterestDataDelayFileName);
 
   Simulator::Run();
   Simulator::Destroy();

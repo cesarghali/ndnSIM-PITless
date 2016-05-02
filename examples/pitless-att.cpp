@@ -37,6 +37,7 @@ namespace ns3 {
 
 ofstream intDelayFile;
 
+// delay is in nanoseconds.
 void
 InterestForwardingDelay(size_t id, ns3::Time eventTime, float delay)
 {
@@ -45,6 +46,7 @@ InterestForwardingDelay(size_t id, ns3::Time eventTime, float delay)
 
 ofstream contentDelayFile;
 
+// delay is in nanoseconds.
 void
 ContentForwardingDelay(size_t id, ns3::Time eventTime, float delay)
 {

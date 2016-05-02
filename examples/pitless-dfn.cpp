@@ -43,12 +43,14 @@ int outRouters[OUT_ROUTERS_COUNT] = {0, 1, 2, 3, 5, 6, 8, 10, 11, 12, 17, 18, 20
 
 ofstream intDelayFile;
 
+// delay is in nanoseconds.
 void
 InterestForwardingDelay(size_t id, ns3::Time eventTime, float delay)
 {
     intDelayFile << id << "\t" << eventTime.GetNanoSeconds() << "\t" << delay * 1000000000 << "\n";
 }
 
+// delay is in nanoseconds.
 ofstream contentDelayFile;
 
 void

@@ -158,6 +158,7 @@ private:
 
   shared_ptr<nfd::Forwarder> m_forwarder;
   bool m_isPITless;
+  bool m_isBridge;
 
   shared_ptr<nfd::InternalFace> m_internalFace;
   shared_ptr<nfd::FibManager> m_fibManager;
@@ -186,10 +187,15 @@ L3Protocol::~L3Protocol()
 void
 L3Protocol::initialize()
 {
-  if (!m_impl->m_isPITless)
-    m_impl->m_forwarder = make_shared<nfd::Forwarder>();
-  else
+  if (m_impl->m_isPITless)
     m_impl->m_forwarder = make_shared<nfd::PITlessForwarder>();
+  else if (m_impl->m_isBridge) {
+    // caw: add SetSupportingName to this so it can be passed here
+    m_impl->m_forwarder = make_shared<nfd::BridgeForwarder>("/router");
+    // m_impl->m_forwarder->setSupportingName("/router");
+  } else
+    m_impl->m_forwarder = make_shared<nfd::Forwarder>();
+
 
   initializeManagement();
   Simulator::ScheduleWithContext(m_node->GetId(), Seconds(0), &L3Protocol::initializeRibManager, this);
@@ -320,6 +326,18 @@ void
 L3Protocol::setIsPITless(bool isPITless)
 {
   m_impl->m_isPITless = isPITless;
+}
+
+bool
+L3Protocol::getIsBridge()
+{
+  return m_impl->m_isBridge;
+}
+
+void
+L3Protocol::setIsBridge(bool isBridge)
+{
+  m_impl->m_isBridge = isBridge;
 }
 
 shared_ptr<nfd::FibManager>

@@ -110,7 +110,7 @@ main(int argc, char* argv[])
       // ndnHelperWithCache.InstallPITless(nodes.Get(i));
 
       // XXX: install bridge and set the supporting name here
-      ndnHelperWithCache.InstallPITlessWithCallback(nodes.Get(i), (size_t)&InterestForwardingDelay, (size_t)&ContentForwardingDelay, i);
+      ndnHelperWithCache.InstallBridgeWithCallback(nodes.Get(i), (size_t)&InterestForwardingDelay, (size_t)&ContentForwardingDelay, i);
   }
 
   ndn::GlobalRoutingHelper ndnGlobalRoutingHelper;

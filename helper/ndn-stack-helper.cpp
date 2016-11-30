@@ -142,6 +142,16 @@ StackHelper::InstallPITless(const NodeContainer& c) const
 }
 
 Ptr<FaceContainer>
+StackHelper::InstallBridge(const NodeContainer& c) const
+{
+  Ptr<FaceContainer> faces = Create<FaceContainer>();
+  for (NodeContainer::Iterator i = c.Begin(); i != c.End(); ++i) {
+    faces->AddAll(InstallBridge(*i));
+  }
+  return faces;
+}
+
+Ptr<FaceContainer>
 StackHelper::InstallAll() const
 {
   return Install(NodeContainer::GetGlobal());
@@ -238,6 +248,43 @@ StackHelper::InstallPITless(Ptr<Node> node) const
 }
 
 Ptr<FaceContainer>
+StackHelper::InstallBridge(Ptr<Node> node) const
+{
+  Ptr<FaceContainer> faces = Create<FaceContainer>();
+
+  if (node->GetObject<L3Protocol>() != 0) {
+    NS_FATAL_ERROR("Cannot re-install PITless NDN stack on node " << node->GetId());
+    return 0;
+  }
+
+  Ptr<L3Protocol> ndn = m_ndnFactory.Create<L3Protocol>();
+  // This line is different as compare to the Install function. It tells L3Protocol
+  // to create a PITless forwarder
+  ndn->setIsBridge(true);
+  ndn->getConfig().put("tables.cs_max_packets", (m_maxCsSize == 0) ? 1 : m_maxCsSize);
+
+  // Create and aggregate content store if NFD's contest store has been disabled
+  if (m_maxCsSize == 0) {
+    ndn->AggregateObject(m_contentStoreFactory.Create<ContentStore>());
+  }
+
+  // Aggregate L3Protocol on node (must be after setting ndnSIM CS)
+  node->AggregateObject(ndn);
+
+  for (uint32_t index = 0; index < node->GetNDevices(); index++) {
+    Ptr<NetDevice> device = node->GetDevice(index);
+    // This check does not make sense: LoopbackNetDevice is installed only if IP stack is installed,
+    // Normally, ndnSIM works without IP stack, so no reason to check
+    // if (DynamicCast<LoopbackNetDevice> (device) != 0)
+    //   continue; // don't create face for a LoopbackNetDevice
+
+    faces->Add(this->createAndRegisterFace(node, ndn, device, true));
+  }
+
+  return faces;
+}
+
+Ptr<FaceContainer>
 StackHelper::InstallPITlessWithCallback(Ptr<Node> node, size_t intDelayCallback, size_t contentDelayCallback, size_t id) const
 {
   Ptr<FaceContainer> faces = InstallPITless(node);
@@ -250,6 +297,18 @@ StackHelper::InstallPITlessWithCallback(Ptr<Node> node, size_t intDelayCallback,
   return faces;
 }
 
+Ptr<FaceContainer>
+StackHelper::InstallBridgeWithCallback(Ptr<Node> node, size_t intDelayCallback, size_t contentDelayCallback, size_t id) const
+{
+  Ptr<FaceContainer> faces = InstallBridge(node);
+
+  // Set the ForwardingDelay callback
+  Ptr<L3Protocol> l3Protocol = node->GetObject<L3Protocol>();
+  nfd::Forwarder& forwarder = *l3Protocol->getForwarder();
+  forwarder.setForwardingDelayCallback(intDelayCallback, contentDelayCallback, id);
+
+  return faces;
+}
 
 void
 StackHelper::AddNetDeviceFaceCreateCallback(TypeId netDeviceType,

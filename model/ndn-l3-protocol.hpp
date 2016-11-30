@@ -106,6 +106,12 @@ public:
   void
   setIsPITless(bool isPITless);
 
+  bool
+  getIsBridge();
+
+  void
+  setIsBridge(bool isBridge);
+
   /**
    * \brief Get smart pointer to nfd::FibManager, used by node's NFD
    */

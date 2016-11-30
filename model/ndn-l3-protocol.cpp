@@ -39,6 +39,7 @@
 
 #include "ns3/ndnSIM/NFD/daemon/fw/forwarder.hpp"
 #include "ns3/ndnSIM/NFD/daemon/fw/pitless-forwarder.hpp"
+#include "ns3/ndnSIM/NFD/daemon/fw/bridge-forwarder.hpp"
 #include "ns3/ndnSIM/NFD/daemon/mgmt/internal-face.hpp"
 #include "ns3/ndnSIM/NFD/daemon/mgmt/fib-manager.hpp"
 #include "ns3/ndnSIM/NFD/daemon/mgmt/face-manager.hpp"

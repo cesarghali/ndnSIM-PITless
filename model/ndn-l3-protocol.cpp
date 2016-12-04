@@ -187,14 +187,13 @@ L3Protocol::~L3Protocol()
 void
 L3Protocol::initialize()
 {
-  if (m_impl->m_isPITless)
-    m_impl->m_forwarder = make_shared<nfd::PITlessForwarder>();
-  else if (m_impl->m_isBridge) {
-    // caw: add SetSupportingName to this so it can be passed here
+  if (m_impl->m_isBridge) {
     m_impl->m_forwarder = make_shared<nfd::BridgeForwarder>("/router");
-    // m_impl->m_forwarder->setSupportingName("/router");
-  } else
+  } else if (m_impl->m_isPITless) {
+    m_impl->m_forwarder = make_shared<nfd::PITlessForwarder>();
+  } else {
     m_impl->m_forwarder = make_shared<nfd::Forwarder>();
+  }
 
 
   initializeManagement();
@@ -392,11 +391,11 @@ L3Protocol::DoDispose(void)
 }
 
 nfd::FaceId
-L3Protocol::addFace(shared_ptr<Face> face, bool isPITless)
+L3Protocol::addFace(shared_ptr<Face> face, bool isPITless, bool isBridge)
 {
   NS_LOG_FUNCTION(this << face.get());
 
-  m_impl->m_forwarder->addFace(face, isPITless);
+  m_impl->m_forwarder->addFace(face, isPITless, isBridge);
 
   // Connect Signals to TraceSource
   face->onReceiveInterest.connect

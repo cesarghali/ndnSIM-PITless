@@ -224,6 +224,7 @@ StackHelper::InstallPITless(Ptr<Node> node) const
   // This line is different as compare to the Install function. It tells L3Protocol
   // to create a PITless forwarder
   ndn->setIsPITless(true);
+  ndn->setIsBridge(false);
   ndn->getConfig().put("tables.cs_max_packets", (m_maxCsSize == 0) ? 1 : m_maxCsSize);
 
   // Create and aggregate content store if NFD's contest store has been disabled
@@ -241,7 +242,7 @@ StackHelper::InstallPITless(Ptr<Node> node) const
     // if (DynamicCast<LoopbackNetDevice> (device) != 0)
     //   continue; // don't create face for a LoopbackNetDevice
 
-    faces->Add(this->createAndRegisterFace(node, ndn, device, true));
+    faces->Add(this->createAndRegisterFace(node, ndn, device, true, false));
   }
 
   return faces;
@@ -253,13 +254,14 @@ StackHelper::InstallBridge(Ptr<Node> node) const
   Ptr<FaceContainer> faces = Create<FaceContainer>();
 
   if (node->GetObject<L3Protocol>() != 0) {
-    NS_FATAL_ERROR("Cannot re-install PITless NDN stack on node " << node->GetId());
+    NS_FATAL_ERROR("Cannot re-install Bridge NDN stack on node " << node->GetId());
     return 0;
   }
 
   Ptr<L3Protocol> ndn = m_ndnFactory.Create<L3Protocol>();
   // This line is different as compare to the Install function. It tells L3Protocol
   // to create a PITless forwarder
+  ndn->setIsPITless(false);
   ndn->setIsBridge(true);
   ndn->getConfig().put("tables.cs_max_packets", (m_maxCsSize == 0) ? 1 : m_maxCsSize);
 
@@ -278,7 +280,7 @@ StackHelper::InstallBridge(Ptr<Node> node) const
     // if (DynamicCast<LoopbackNetDevice> (device) != 0)
     //   continue; // don't create face for a LoopbackNetDevice
 
-    faces->Add(this->createAndRegisterFace(node, ndn, device, true));
+    faces->Add(this->createAndRegisterFace(node, ndn, device, false, true));
   }
 
   return faces;
@@ -355,13 +357,13 @@ StackHelper::DefaultNetDeviceCallback(Ptr<Node> node, Ptr<L3Protocol> ndn,
 
 shared_ptr<NetDeviceFace>
 StackHelper::PointToPointNetDeviceCallback(Ptr<Node> node, Ptr<L3Protocol> ndn,
-                                           Ptr<NetDevice> device, bool isPITless) const
+                                           Ptr<NetDevice> device, bool isPITless, bool isBridge) const
 {
   NS_LOG_DEBUG("Creating point-to-point NetDeviceFace on node " << node->GetId());
 
   shared_ptr<NetDeviceFace> face = std::make_shared<NetDeviceFace>(node, device);
 
-  ndn->addFace(face, isPITless);
+  ndn->addFace(face, isPITless, isBridge);
   NS_LOG_LOGIC("Node " << node->GetId() << ": added NetDeviceFace as face #"
                        << face->getLocalUri());
 
@@ -418,14 +420,14 @@ StackHelper::UpdateAll()
 
 shared_ptr<NetDeviceFace>
 StackHelper::createAndRegisterFace(Ptr<Node> node, Ptr<L3Protocol> ndn, Ptr<NetDevice> device,
-                                   bool isPITless) const
+                                   bool isPITless, bool isBridge) const
 {
   shared_ptr<NetDeviceFace> face;
 
   for (const auto& item : m_netDeviceCallbacks) {
     if (device->GetInstanceTypeId() == item.first ||
         device->GetInstanceTypeId().IsChildOf(item.first)) {
-      face = item.second(node, ndn, device, isPITless);
+      face = item.second(node, ndn, device, isPITless, isBridge);
       if (face != 0)
         break;
     }

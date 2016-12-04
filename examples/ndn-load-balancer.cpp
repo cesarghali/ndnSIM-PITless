@@ -87,8 +87,7 @@ main(int argc, char* argv[])
 
   // Install random-load-balancer forwarding strategy in
   // node UCLA-HUB
-  StrategyChoiceHelper::Install<nfd::fw::RandomLoadBalancerStrategy>(Names::Find<Node>("UCLA-HUB"),
-                                                                     prefix);
+  StrategyChoiceHelper::Install<nfd::fw::RandomLoadBalancerStrategy>(Names::Find<Node>("UCLA-HUB"), prefix);
 
   AppHelper consumerHelper("ns3::ndn::ConsumerCbr");
   consumerHelper.SetPrefix(prefix);

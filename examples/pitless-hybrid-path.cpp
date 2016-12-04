@@ -81,7 +81,7 @@ main(int argc, char* argv[])
   rttDelayFile.open(rttDelayFileName);
 
   NodeContainer nodes;
-  int numNodes = 3;
+  int numNodes = 4;
   nodes.Create(numNodes);
 
   PointToPointHelper p2p;
@@ -105,13 +105,11 @@ main(int argc, char* argv[])
   ndn::StackHelper ndnHelperWithCache;
   ndnHelperWithCache.SetDefaultRoutes(true);
   ndnHelperWithCache.SetOldContentStore("ns3::ndn::cs::Freshness::Lru", "MaxSize", "0");
-  for (int i = consumerId + 1; i < producerId; i++) {
-      // ndnHelperWithCache.Install(nodes.Get(i));
-      // ndnHelperWithCache.InstallPITless(nodes.Get(i));
 
-      // XXX: install bridge and set the supporting name here
-      ndnHelperWithCache.InstallBridgeWithCallback(nodes.Get(i), (size_t)&InterestForwardingDelay, (size_t)&ContentForwardingDelay, i);
-  }
+  ndnHelperWithCache.InstallBridgeWithCallback(nodes.Get(1),
+    (size_t)&InterestForwardingDelay, (size_t)&ContentForwardingDelay, 1);
+  ndnHelperWithCache.InstallPITlessWithCallback(nodes.Get(2),
+    (size_t)&InterestForwardingDelay, (size_t)&ContentForwardingDelay, 2);
 
   ndn::GlobalRoutingHelper ndnGlobalRoutingHelper;
   ndnGlobalRoutingHelper.InstallAll();
@@ -132,7 +130,7 @@ main(int argc, char* argv[])
   ndnGlobalRoutingHelper.AddOrigins(prefix, nodes.Get(1));
 
   // Producer
-  ndn::AppHelper producerHelper("ns3::ndn::Producer");
+  ndn::AppHelper producerHelper("ns3::ndn::PITlessProducer");
   producerHelper.SetPrefix("/producer");
   producerHelper.SetAttribute("PayloadSize", StringValue("1024"));
   producerHelper.Install(nodes.Get(producerId)); // last node
@@ -140,8 +138,9 @@ main(int argc, char* argv[])
 
   // Choosing forwarding strategy
   ndn::StrategyChoiceHelper::Install(nodes.Get(0), "/prefix", "/localhost/nfd/strategy/best-route");
-  ndn::StrategyChoiceHelper::Install(nodes.Get(1), "/prefix", "/localhost/nfd/strategy/pitless-best-route");
-  ndn::StrategyChoiceHelper::Install(nodes.Get(2), "/prefix", "/localhost/nfd/strategy/best-route");
+  ndn::StrategyChoiceHelper::Install(nodes.Get(1), "/prefix", "/localhost/nfd/strategy/bridge-best-route");
+  ndn::StrategyChoiceHelper::Install(nodes.Get(2), "/prefix", "/localhost/nfd/strategy/pitless-best-route");
+  ndn::StrategyChoiceHelper::Install(nodes.Get(3), "/prefix", "/localhost/nfd/strategy/best-route");
 
   ndn::GlobalRoutingHelper::CalculateRoutes();
 

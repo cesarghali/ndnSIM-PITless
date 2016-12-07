@@ -237,14 +237,13 @@ main(int argc, char* argv[])
   for (int i = NUM_OF_CONSUMERS; i < NUM_OF_CONSUMERS + NUM_OF_ROUTERS; i++) {
     bool isEdgeRouter = false;
     for (int j = 0; j < OUT_ROUTERS_COUNT; j++) {
-      if (outRouters[j] == i) {
+      if (outRouters[j] == (i - NUM_OF_CONSUMERS)) {
         isEdgeRouter = true;
         break;
       }
     }
     if (!isEdgeRouter) {
-      int routerIndex = NUM_OF_CONSUMERS + i;
-      ndnHelperWithCache.InstallPITlessWithCallback(nodes.Get(routerIndex), (size_t)&InterestForwardingDelay, (size_t)&ContentForwardingDelay, routerIndex);
+      ndnHelperWithCache.InstallPITlessWithCallback(nodes.Get(i), (size_t)&InterestForwardingDelay, (size_t)&ContentForwardingDelay, i);
     }
   }
 
@@ -252,7 +251,7 @@ main(int argc, char* argv[])
   ndnGlobalRoutingHelper.InstallAll();
 
   // Consumer
-  ndn::AppHelper consumerHelper("ns3::ndn::PITlessConsumerCbr");
+  ndn::AppHelper consumerHelper("ns3::ndn::ConsumerCbr");
   consumerHelper.SetPrefix("/producer"); // Consumer will request /producer/0, /producer/1, ...
   consumerHelper.SetAttribute("Frequency", StringValue("10")); // 10 interests a second
   consumerHelper.SetAttribute("RTTDelayCallback", UintegerValue((size_t)&RTTDelayCallback));

@@ -107,7 +107,7 @@ main(int argc, char* argv[])
   ndnHelperWithCache.SetOldContentStore("ns3::ndn::cs::Freshness::Lru", "MaxSize", "0");
 
   ndnHelperWithCache.InstallBridgeWithCallback(nodes.Get(1),
-    (size_t)&InterestForwardingDelay, (size_t)&ContentForwardingDelay, 1);
+    (size_t)&InterestForwardingDelay, (size_t)&ContentForwardingDelay, "/router", 1);
   ndnHelperWithCache.InstallPITlessWithCallback(nodes.Get(2),
     (size_t)&InterestForwardingDelay, (size_t)&ContentForwardingDelay, 2);
 
@@ -118,7 +118,7 @@ main(int argc, char* argv[])
   ndn::AppHelper consumerHelper("ns3::ndn::ConsumerCbr");
   consumerHelper.SetPrefix("/producer"); // Consumer will request /producer/0, /producer/1, ...
   consumerHelper.SetAttribute("Frequency", StringValue("10")); // 10 interests a second
-  // consumerHelper.SetAttribute("RTTDelayCallback", UintegerValue((size_t)&RTTDelayCallback));
+  consumerHelper.SetAttribute("RTTDelayCallback", UintegerValue((size_t)&RTTDelayCallback));
   // std::stringstream sstm;
   // sstm << "/consumer/" << consumerId;
   // std::string prefix = sstm.str();

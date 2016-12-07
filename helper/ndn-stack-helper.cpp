@@ -142,11 +142,11 @@ StackHelper::InstallPITless(const NodeContainer& c) const
 }
 
 Ptr<FaceContainer>
-StackHelper::InstallBridge(const NodeContainer& c) const
+StackHelper::InstallBridge(const NodeContainer& c, std::string prefix) const
 {
   Ptr<FaceContainer> faces = Create<FaceContainer>();
   for (NodeContainer::Iterator i = c.Begin(); i != c.End(); ++i) {
-    faces->AddAll(InstallBridge(*i));
+    faces->AddAll(InstallBridge(*i, prefix));
   }
   return faces;
 }
@@ -224,7 +224,7 @@ StackHelper::InstallPITless(Ptr<Node> node) const
   // This line is different as compare to the Install function. It tells L3Protocol
   // to create a PITless forwarder
   ndn->setIsPITless(true);
-  ndn->setIsBridge(false);
+  ndn->setIsBridge(false, "");
   ndn->getConfig().put("tables.cs_max_packets", (m_maxCsSize == 0) ? 1 : m_maxCsSize);
 
   // Create and aggregate content store if NFD's contest store has been disabled
@@ -249,7 +249,7 @@ StackHelper::InstallPITless(Ptr<Node> node) const
 }
 
 Ptr<FaceContainer>
-StackHelper::InstallBridge(Ptr<Node> node) const
+StackHelper::InstallBridge(Ptr<Node> node, std::string prefix) const
 {
   Ptr<FaceContainer> faces = Create<FaceContainer>();
 
@@ -262,7 +262,7 @@ StackHelper::InstallBridge(Ptr<Node> node) const
   // This line is different as compare to the Install function. It tells L3Protocol
   // to create a PITless forwarder
   ndn->setIsPITless(false);
-  ndn->setIsBridge(true);
+  ndn->setIsBridge(true, prefix);
   ndn->getConfig().put("tables.cs_max_packets", (m_maxCsSize == 0) ? 1 : m_maxCsSize);
 
   // Create and aggregate content store if NFD's contest store has been disabled
@@ -300,9 +300,9 @@ StackHelper::InstallPITlessWithCallback(Ptr<Node> node, size_t intDelayCallback,
 }
 
 Ptr<FaceContainer>
-StackHelper::InstallBridgeWithCallback(Ptr<Node> node, size_t intDelayCallback, size_t contentDelayCallback, size_t id) const
+StackHelper::InstallBridgeWithCallback(Ptr<Node> node, size_t intDelayCallback, size_t contentDelayCallback, std::string prefix, size_t id) const
 {
-  Ptr<FaceContainer> faces = InstallBridge(node);
+  Ptr<FaceContainer> faces = InstallBridge(node, prefix);
 
   // Set the ForwardingDelay callback
   Ptr<L3Protocol> l3Protocol = node->GetObject<L3Protocol>();

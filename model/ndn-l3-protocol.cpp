@@ -159,6 +159,7 @@ private:
   shared_ptr<nfd::Forwarder> m_forwarder;
   bool m_isPITless;
   bool m_isBridge;
+  std::string m_Prefix;
 
   shared_ptr<nfd::InternalFace> m_internalFace;
   shared_ptr<nfd::FibManager> m_fibManager;
@@ -188,7 +189,7 @@ void
 L3Protocol::initialize()
 {
   if (m_impl->m_isBridge) {
-    m_impl->m_forwarder = make_shared<nfd::BridgeForwarder>("/router");
+    m_impl->m_forwarder = make_shared<nfd::BridgeForwarder>(m_impl->m_Prefix);
   } else if (m_impl->m_isPITless) {
     m_impl->m_forwarder = make_shared<nfd::PITlessForwarder>();
   } else {
@@ -334,9 +335,10 @@ L3Protocol::getIsBridge()
 }
 
 void
-L3Protocol::setIsBridge(bool isBridge)
+L3Protocol::setIsBridge(bool isBridge, std::string prefix)
 {
   m_impl->m_isBridge = isBridge;
+  m_impl->m_Prefix  = prefix;
 }
 
 shared_ptr<nfd::FibManager>

@@ -110,7 +110,7 @@ public:
   getIsBridge();
 
   void
-  setIsBridge(bool isBridge);
+  setIsBridge(bool isBridge, std::string prefix);
 
   /**
    * \brief Get smart pointer to nfd::FibManager, used by node's NFD

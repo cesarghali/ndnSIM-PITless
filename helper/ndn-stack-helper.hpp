@@ -156,13 +156,13 @@ public:
   InstallPITless(Ptr<Node> node) const;
 
   Ptr<FaceContainer>
-  InstallBridge(Ptr<Node> node) const;
+  InstallBridge(Ptr<Node> node, std::string prefix) const;
 
   Ptr<FaceContainer>
   InstallPITlessWithCallback(Ptr<Node> node, size_t intDelayCallback, size_t contentDelayCallback, size_t id) const;
 
   Ptr<FaceContainer>
-  InstallBridgeWithCallback(Ptr<Node> node, size_t intDelayCallback, size_t contentDelayCallback, size_t id) const;
+  InstallBridgeWithCallback(Ptr<Node> node, size_t intDelayCallback, size_t contentDelayCallback, std::string prefix, size_t id) const;
 
   /**
    * \brief Install Ndn stack on each node in the input container
@@ -183,7 +183,7 @@ public:
   InstallPITless(const NodeContainer& c) const;
 
   Ptr<FaceContainer>
-  InstallBridge(const NodeContainer& c) const;
+  InstallBridge(const NodeContainer& c, std::string prefix) const;
 
   /**
    * \brief Install Ndn stack on all nodes in the simulation

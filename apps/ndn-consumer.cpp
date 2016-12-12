@@ -235,11 +235,12 @@ Consumer::OnData(shared_ptr<const Data> data)
     }
   }
 
-  auto end = std::chrono::high_resolution_clock::now();
-  std::chrono::duration<float> duration = end - m_rttDelay[seq];
+  auto end = Simulator::Now().GetInteger();
+  // std::chrono::duration<float> duration = end - m_rttDelay[seq];
+  long int duration = end - m_rttDelay[seq];
   if (m_rttDelayCallback != 0) {
     RTTDelayCallback rttDelayCallback = reinterpret_cast<RTTDelayCallback>(m_rttDelayCallback);
-    rttDelayCallback(GetNode()->GetId(), ns3::Simulator::Now(), duration.count(), hopCount);
+    rttDelayCallback(GetNode()->GetId(), ns3::Simulator::Now(), duration, hopCount);
   }
 
   SeqTimeoutsContainer::iterator entry = m_seqLastDelay.find(seq);
@@ -285,7 +286,7 @@ Consumer::WillSendOutInterest(uint32_t sequenceNumber)
 
   m_seqTimeouts.insert(SeqTimeout(sequenceNumber, Simulator::Now()));
   m_seqFullDelay.insert(SeqTimeout(sequenceNumber, Simulator::Now()));
-  m_rttDelay[sequenceNumber] = std::chrono::high_resolution_clock::now();
+  m_rttDelay[sequenceNumber] = Simulator::Now().GetInteger();
 
   m_seqLastDelay.erase(sequenceNumber);
   m_seqLastDelay.insert(SeqTimeout(sequenceNumber, Simulator::Now()));

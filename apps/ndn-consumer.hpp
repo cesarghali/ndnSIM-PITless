@@ -203,7 +203,8 @@ protected:
   SeqTimeoutsContainer m_seqLastDelay;
   SeqTimeoutsContainer m_seqFullDelay;
   std::map<uint32_t, uint32_t> m_seqRetxCounts;
-  std::map<uint32_t, std::chrono::high_resolution_clock::time_point> m_rttDelay;
+  // std::map<uint32_t, std::chrono::high_resolution_clock::time_point> m_rttDelay;
+  std::map<uint32_t, long int> m_rttDelay;
 
   TracedCallback<Ptr<App> /* app */, uint32_t /* seqno */, Time /* delay */, int32_t /*hop count*/>
     m_lastRetransmittedInterestDataDelay;

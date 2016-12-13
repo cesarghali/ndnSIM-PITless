@@ -78,7 +78,7 @@ main(int argc, char* argv[])
 
   intDelayFile.open(intDelayFileName);
   contentDelayFile.open(contentDelayFileName);
-  rttDelayFile.open(rttDelayFileName);
+  // rttDelayFile.open(rttDelayFileName);
 
   NodeContainer nodes;
   int numNodes = 4;
@@ -114,11 +114,13 @@ main(int argc, char* argv[])
   ndn::GlobalRoutingHelper ndnGlobalRoutingHelper;
   ndnGlobalRoutingHelper.InstallAll();
 
+  ndn::AppDelayTracer::InstallAll(rttDelayFileName);
+
   // Consumer
   ndn::AppHelper consumerHelper("ns3::ndn::ConsumerCbr");
   consumerHelper.SetPrefix("/producer"); // Consumer will request /producer/0, /producer/1, ...
   consumerHelper.SetAttribute("Frequency", StringValue("10")); // 10 interests a second
-  consumerHelper.SetAttribute("RTTDelayCallback", UintegerValue((size_t)&RTTDelayCallback));
+  // consumerHelper.SetAttribute("RTTDelayCallback", UintegerValue((size_t)&RTTDelayCallback));
   // std::stringstream sstm;
   // sstm << "/consumer/" << consumerId;
   // std::string prefix = sstm.str();

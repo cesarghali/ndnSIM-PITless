@@ -202,7 +202,7 @@ main(int argc, char* argv[])
     // Install NDN stack without cache
     ndn::StackHelper ndnHelperNoCache;
     ndnHelperNoCache.SetDefaultRoutes(true);
-    ndnHelperNoCache.SetOldContentStore("ns3::ndn::cs::Freshness::Lru", "MaxSize", "1000");
+    ndnHelperNoCache.SetOldContentStore("ns3::ndn::cs::Nocache"); // no cache
     for (int i = 0; i < NUM_OF_CONSUMERS; i++) {
     //   ndnHelperNoCache.Install(nodes.Get(i));
       ndnHelperNoCache.InstallPITless(nodes.Get(i));

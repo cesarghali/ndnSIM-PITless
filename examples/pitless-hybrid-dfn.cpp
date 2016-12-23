@@ -31,15 +31,15 @@ namespace ns3 {
 #define GROUP_SIZE 10
 #define NUM_OF_GROUPS 16
 #define NUM_OF_CONSUMERS NUM_OF_GROUPS * GROUP_SIZE
-#define NUM_OF_ROUTERS 30
+#define NUM_OF_ROUTERS 31
 #define NUM_OF_PRODUCER 1
 #define TOTAL_NODES NUM_OF_CONSUMERS + NUM_OF_ROUTERS + NUM_OF_PRODUCER
 
-#define IN_ROUTERS_COUNT 13
-#define OUT_ROUTERS_COUNT 17
+#define IN_ROUTERS_COUNT 15
+#define OUT_ROUTERS_COUNT 16
 
-int inRouters[IN_ROUTERS_COUNT] = {4, 7, 9, 13, 14, 15, 16, 19, 21, 22, 23, 25, 27};
-int outRouters[OUT_ROUTERS_COUNT] = {0, 1, 2, 3, 5, 6, 8, 10, 11, 12, 17, 18, 20, 24, 26, 28, 29};
+int inRouters[IN_ROUTERS_COUNT] = {4, 7, 9, 13, 14, 15, 16, 19, 22, 23, 25, 26, 27, 29, 30};
+int outRouters[OUT_ROUTERS_COUNT] = {0, 1, 2, 3, 5, 6, 8, 10, 11, 12, 17, 18, 20, 21, 24, 28};
 
 ofstream intDelayFile;
 
@@ -91,7 +91,7 @@ main(int argc, char* argv[])
 
   intDelayFile.open(intDelayFileName);
   contentDelayFile.open(contentDelayFileName);
-  // rttDelayFile.open(rttDelayFileName);
+  rttDelayFile.open(rttDelayFileName);
 
   // Creating nodes
   NodeContainer nodes;
@@ -123,17 +123,17 @@ main(int argc, char* argv[])
   for (int i = 0; i < GROUP_SIZE; i++, g++)
     p2p.Install (nodes.Get (g), nodes.Get (18 + NUM_OF_CONSUMERS));     // C9 <--> R18
   for (int i = 0; i < GROUP_SIZE; i++, g++)
-    p2p.Install (nodes.Get (g), nodes.Get (17 + NUM_OF_CONSUMERS));    // C10 <--> R17
+    p2p.Install (nodes.Get (g), nodes.Get (17 + NUM_OF_CONSUMERS));     // C10 <--> R17
   for (int i = 0; i < GROUP_SIZE; i++, g++)
-    p2p.Install (nodes.Get (g), nodes.Get (20 + NUM_OF_CONSUMERS));    // C11 <--> R20
+    p2p.Install (nodes.Get (g), nodes.Get (20 + NUM_OF_CONSUMERS));     // C11 <--> R20
   for (int i = 0; i < GROUP_SIZE; i++, g++)
-    p2p.Install (nodes.Get (g), nodes.Get (24 + NUM_OF_CONSUMERS));    // C12 <--> R24
+    p2p.Install (nodes.Get (g), nodes.Get (24 + NUM_OF_CONSUMERS));     // C12 <--> R24
   for (int i = 0; i < GROUP_SIZE; i++, g++)
-    p2p.Install (nodes.Get (g), nodes.Get (29 + NUM_OF_CONSUMERS));    // C13 <--> R2
+    p2p.Install (nodes.Get (g), nodes.Get (2 + NUM_OF_CONSUMERS));      // C13 <--> R2
   for (int i = 0; i < GROUP_SIZE; i++, g++)
-    p2p.Install (nodes.Get (g), nodes.Get (28 + NUM_OF_CONSUMERS));    // C14 <--> R28
+    p2p.Install (nodes.Get (g), nodes.Get (28 + NUM_OF_CONSUMERS));     // C14 <--> R28
   for (int i = 0; i < GROUP_SIZE; i++, g++)
-    p2p.Install (nodes.Get (g), nodes.Get (21 + NUM_OF_CONSUMERS));    // C15 <--> R21
+    p2p.Install (nodes.Get (g), nodes.Get (21 + NUM_OF_CONSUMERS));     // C15 <--> R21
 
   // Connect routers
   p2p.Install (nodes.Get (0 + NUM_OF_CONSUMERS), nodes.Get (9 + NUM_OF_CONSUMERS));      // R0 <--> R9
@@ -204,7 +204,6 @@ main(int argc, char* argv[])
     ndnHelperNoCache.SetDefaultRoutes(true);
     ndnHelperNoCache.SetOldContentStore("ns3::ndn::cs::Nocache"); // no cache
     for (int i = 0; i < NUM_OF_CONSUMERS; i++) {
-    //   ndnHelperNoCache.Install(nodes.Get(i));
       ndnHelperNoCache.Install(nodes.Get(i));
     }
 
@@ -215,12 +214,13 @@ main(int argc, char* argv[])
     // Install on routers with cache
     ndn::StackHelper ndnHelperWithCache;
     ndnHelperWithCache.SetDefaultRoutes(true);
-    ndnHelperWithCache.SetOldContentStore("ns3::ndn::cs::Freshness::Lru", "MaxSize", "0");
+    ndnHelperWithCache.SetOldContentStore("ns3::ndn::cs::Nocache"); // "ns3::ndn::cs::Freshness::Lru", "MaxSize", "0");
     for (int i = 0; i < OUT_ROUTERS_COUNT; i++) {
       int routerIndex = NUM_OF_CONSUMERS + outRouters[i];
       std::stringstream sstm;
       sstm << "/router/" << routerIndex;
       std::string prefix = sstm.str();
+      std::cout << "adding bridge to " << routerIndex << std::endl;
       ndnHelperWithCache.InstallBridgeWithCallback(nodes.Get(routerIndex), (size_t)&InterestForwardingDelay, (size_t)&ContentForwardingDelay, prefix, routerIndex);
     }
     for (int i = 0; i < IN_ROUTERS_COUNT; i++) {
@@ -231,13 +231,13 @@ main(int argc, char* argv[])
     ndn::GlobalRoutingHelper ndnGlobalRoutingHelper;
     ndnGlobalRoutingHelper.InstallAll();
 
-    ndn::AppDelayTracer::InstallAll(rttDelayFileName);
+    // ndn::AppDelayTracer::InstallAll(rttDelayFileName);
 
     // Consumer (normal)
     ndn::AppHelper consumerHelper("ns3::ndn::ConsumerCbr");
     consumerHelper.SetPrefix("/producer"); // Consumer will request /producer/0, /producer/1, ...
     consumerHelper.SetAttribute("Frequency", StringValue("10")); // 10 interests a second
-    // consumerHelper.SetAttribute("RTTDelayCallback", UintegerValue((size_t)&RTTDelayCallback));
+    consumerHelper.SetAttribute("RTTDelayCallback", UintegerValue((size_t)&RTTDelayCallback));
     for (int i = 0; i < NUM_OF_CONSUMERS; i++) {
       consumerHelper.Install(nodes.Get(i));
     }
@@ -259,7 +259,20 @@ main(int argc, char* argv[])
     }
 
     // Choosing forwarding strategy
-    ndn::StrategyChoiceHelper::InstallAll("/prefix", "/localhost/nfd/strategy/pitless-best-route");
+    for (int i = 0; i < NUM_OF_CONSUMERS; i++) {
+        ndn::StrategyChoiceHelper::Install(nodes.Get(i), "/prefix", "/localhost/nfd/strategy/best-route");
+    }
+    for (int i = 0; i < OUT_ROUTERS_COUNT; i++) {
+        int routerIndex = NUM_OF_CONSUMERS + outRouters[i];
+        ndn::StrategyChoiceHelper::Install(nodes.Get(routerIndex), "/prefix", "/localhost/nfd/strategy/bridge-best-route");
+    }
+    for (int i = 0; i < IN_ROUTERS_COUNT; i++) {
+        int routerIndex = NUM_OF_CONSUMERS + inRouters[i];
+        ndn::StrategyChoiceHelper::Install(nodes.Get(routerIndex), "/prefix", "/localhost/nfd/strategy/pitless-best-route");
+    }
+    ndn::StrategyChoiceHelper::Install(nodes.Get(producerId), "/prefix", "/localhost/nfd/strategy/pitless-best-route");
+
+    //ndn::StrategyChoiceHelper::InstallAll("/prefix", "/localhost/nfd/strategy/pitless-best-route");
 
     ndn::GlobalRoutingHelper::CalculateRoutes();
 

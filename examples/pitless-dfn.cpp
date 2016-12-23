@@ -91,7 +91,7 @@ main(int argc, char* argv[])
 
   intDelayFile.open(intDelayFileName);
   contentDelayFile.open(contentDelayFileName);
-  // rttDelayFile.open(rttDelayFileName);
+  rttDelayFile.open(rttDelayFileName);
 
   // Creating nodes
   NodeContainer nodes;
@@ -215,7 +215,8 @@ main(int argc, char* argv[])
     // Install on routers with cache
     ndn::StackHelper ndnHelperWithCache;
     ndnHelperWithCache.SetDefaultRoutes(true);
-    ndnHelperWithCache.SetOldContentStore("ns3::ndn::cs::Freshness::Lru", "MaxSize", "0");
+    // ndnHelperWithCache.SetOldContentStore("ns3::ndn::cs::Freshness::Lru", "MaxSize", "0");
+    ndnHelperWithCache.SetOldContentStore("ns3::ndn::cs::Nocache");
     for (int i = NUM_OF_CONSUMERS; i < NUM_OF_CONSUMERS + NUM_OF_ROUTERS; i++) {
     //   ndnHelperWithCache.Install(nodes.Get(i));
     //   ndnHelperWithCache.InstallPITless(nodes.Get(i));
@@ -225,13 +226,13 @@ main(int argc, char* argv[])
     ndn::GlobalRoutingHelper ndnGlobalRoutingHelper;
     ndnGlobalRoutingHelper.InstallAll();
 
-    ndn::AppDelayTracer::InstallAll(rttDelayFileName);
+    //ndn::AppDelayTracer::InstallAll(rttDelayFileName);
 
     // Consumer
     ndn::AppHelper consumerHelper("ns3::ndn::PITlessConsumerCbr");
     consumerHelper.SetPrefix("/producer"); // Consumer will request /producer/0, /producer/1, ...
     consumerHelper.SetAttribute("Frequency", StringValue("10")); // 10 interests a second
-    // consumerHelper.SetAttribute("RTTDelayCallback", UintegerValue((size_t)&RTTDelayCallback));
+    consumerHelper.SetAttribute("RTTDelayCallback", UintegerValue((size_t)&RTTDelayCallback));
     for (int i = 0; i < NUM_OF_CONSUMERS; i++) {
       std::stringstream sstm;
       sstm << "/consumer/" << i;

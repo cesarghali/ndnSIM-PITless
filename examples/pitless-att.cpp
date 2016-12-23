@@ -220,7 +220,7 @@ main(int argc, char* argv[])
   // Install on routers with cache
   ndn::StackHelper ndnHelperWithCache;
   ndnHelperWithCache.SetDefaultRoutes(true);
-  ndnHelperWithCache.SetOldContentStore("ns3::ndn::cs::Freshness::Lru", "MaxSize", "0");
+  ndnHelperWithCache.SetOldContentStore("ns3::ndn::cs::Nocache");
   for (int i = NUM_OF_CONSUMERS; i < NUM_OF_CONSUMERS + NUM_OF_ROUTERS; i++) {
     // ndnHelperWithCache.Install(nodes.Get(i));
     // ndnHelperWithCache.InstallPITless(nodes.Get(i));

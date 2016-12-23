@@ -226,7 +226,7 @@ main(int argc, char* argv[])
   // Install on routers with cache
   ndn::StackHelper ndnHelperWithCache;
   ndnHelperWithCache.SetDefaultRoutes(true);
-  ndnHelperWithCache.SetOldContentStore("ns3::ndn::cs::Freshness::Lru", "MaxSize", "0");
+  ndnHelperWithCache.SetOldContentStore("ns3::ndn::cs::Nocache");
   for (int i = 0; i < OUT_ROUTERS_COUNT; i++) {
     int routerIndex = NUM_OF_CONSUMERS + outRouters[i];
     std::stringstream sstm;

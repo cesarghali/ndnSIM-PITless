@@ -196,6 +196,7 @@ Consumer::SendPacket()
 
   // NS_LOG_INFO ("Requesting Interest: \n" << *interest);
   NS_LOG_INFO("> Interest for " << seq);
+  std::cout << GetNode()->GetId() << " INTEREST" << std::endl;
 
   WillSendOutInterest(seq);
 
@@ -240,7 +241,7 @@ Consumer::OnData(shared_ptr<const Data> data)
   long int duration = end - m_rttDelay[seq];
   if (m_rttDelayCallback != 0) {
     RTTDelayCallback rttDelayCallback = reinterpret_cast<RTTDelayCallback>(m_rttDelayCallback);
-    rttDelayCallback(GetNode()->GetId(), ns3::Simulator::Now(), duration, hopCount  );
+    rttDelayCallback(GetNode()->GetId(), ns3::Simulator::Now(), duration, hopCount);
   }
 
   SeqTimeoutsContainer::iterator entry = m_seqLastDelay.find(seq);
